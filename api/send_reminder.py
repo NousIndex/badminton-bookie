@@ -11,12 +11,9 @@ app = FastAPI()
 
 TOKEN = os.getenv("TELE_TOKEN")
 CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
-today_date = datetime.today().strftime("%Y-%m-%d")
 
-# Add 14 days
+today_date = datetime.today()
 future_date = today_date + timedelta(days=14)
-
-# Format the future date as "YYYY-MM-DD"
 future_date_str = future_date.strftime('%Y-%m-%d')
 
 bot = telegram.Bot(token=TOKEN)
