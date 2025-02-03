@@ -13,18 +13,19 @@ CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
 
 bot = telegram.Bot(token=TOKEN)
 
+scheduler = BackgroundScheduler()
+scheduler.start()
+sg_timezone = timezone("Asia/Singapore")
+
 async def send_reminder():
     await bot.send_message(chat_id=CHAT_ID, text="📢 Weekend Reminder: Don't forget to relax!")
 
-scheduler = BackgroundScheduler()
-sg_timezone = timezone("Asia/Singapore")
 
 scheduler.add_job(
     lambda: asyncio.run(send_reminder()),
-    CronTrigger(day_of_week="mon,sat,sun", hour=19, minute=25, timezone=sg_timezone)
+    CronTrigger(day_of_week="mon,sat,sun", hour=19, minute=50, timezone=sg_timezone)
 )
 
-scheduler.start()
 
 @app.get("/")
 def home():
