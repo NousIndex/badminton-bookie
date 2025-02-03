@@ -4,7 +4,7 @@
       { "src": "api/send_reminder.py", "use": "@vercel/python" }
     ],
     "routes": [
-      { "src": "/send_reminder", "dest": "/api/send_reminder.py" }
+      { "src": "/(.*)", "dest": "/api/send_reminder.py" }
     ]
   }
   
