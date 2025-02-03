@@ -5,13 +5,19 @@ from fastapi import FastAPI, Request
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
 TOKEN = os.getenv("TELE_TOKEN")
 CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
 today_date = datetime.today().strftime("%Y-%m-%d")
+
+# Add 14 days
+future_date = today_date + timedelta(days=14)
+
+# Format the future date as "YYYY-MM-DD"
+future_date_str = future_date.strftime('%Y-%m-%d')
 
 bot = telegram.Bot(token=TOKEN)
 
@@ -23,8 +29,8 @@ sg_timezone = timezone("Asia/Singapore")
 async def send_reminder():
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="https://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
-        + today_date,
+        text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
+        + future_date_str,
         disable_notification=True,
     )
 
