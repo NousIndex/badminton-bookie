@@ -35,15 +35,3 @@ def home():
 async def manual_trigger():
     await send_reminder()
     return {"message": "Reminder sent!"}
-
-@app.post(f"/{TOKEN}")
-async def webhook(request: Request):
-    update = await request.json()
-    message = update.get("message", {})
-    chat_id = message.get("chat", {}).get("id")
-    text = message.get("text", "")
-
-    if text == "/start":
-        await bot.send_message(chat_id=chat_id, text="Hello! I am your reminder bot! 📢")
-    
-    return {"ok": True}
