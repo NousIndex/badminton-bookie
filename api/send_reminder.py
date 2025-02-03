@@ -1,7 +1,7 @@
 import os
 import asyncio
 import telegram
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
@@ -23,7 +23,7 @@ async def send_reminder():
 
 scheduler.add_job(
     lambda: asyncio.run(send_reminder()),
-    CronTrigger(day_of_week="mon,sat,sun", hour=19, minute=50, timezone=sg_timezone)
+    CronTrigger(day_of_week="mon,sat,sun", hour=20, minute=0, timezone=sg_timezone)
 )
 
 
@@ -35,3 +35,15 @@ def home():
 async def manual_trigger():
     await send_reminder()
     return {"message": "Reminder sent!"}
+
+@app.post(f"/{TOKEN}")
+async def webhook(request: Request):
+    update = await request.json()
+    message = update.get("message", {})
+    chat_id = message.get("chat", {}).get("id")
+    text = message.get("text", "")
+
+    if text == "/start":
+        await bot.send_message(chat_id=chat_id, text="Hello! I am your reminder bot! 📢")
+    
+    return {"ok": True}
