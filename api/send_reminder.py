@@ -8,10 +8,8 @@ from pytz import timezone
 
 app = FastAPI()
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
-print(TOKEN)
+TOKEN = os.getenv("TELE_TOKEN")
+CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
 
 bot = telegram.Bot(token=TOKEN)
 
