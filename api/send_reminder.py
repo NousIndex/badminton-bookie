@@ -61,6 +61,6 @@ def home():
 @app.get("/send_reminder")
 async def manual_trigger(request: Request):
     headers = dict(request.headers)
-    print(headers)
+    print(headers["auth_key"])
     #await send_reminder()
     return {"message": "Reminder sent!", "headers": headers}
