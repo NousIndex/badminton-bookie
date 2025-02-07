@@ -61,10 +61,12 @@ def home():
 @app.get("/send_reminder")
 async def manual_trigger(request: Request):
     headers = dict(request.headers)
-    print(headers["auth_key"])
-    if aes_decrypt(headers["auth_key"],AUTH_KEY) == KEY_WORD:
-        print("YES")
-    else:
-        print("FAILED")
-    #await send_reminder()
-    return {"message": "Reminder sent!", "headers": headers}
+    print(headers)
+    try:
+        if aes_decrypt(headers["auth_key"],AUTH_KEY) == KEY_WORD:
+            await send_reminder()
+        else:
+            pass
+    except:
+        pass
+    return {"message": "Reminder sent!"}
