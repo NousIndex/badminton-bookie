@@ -20,7 +20,7 @@ KEY_WORD = os.getenv("KEY_WORD")
 
 today_date = datetime.today()
 future_date = today_date + timedelta(days=14)
-future_date_str = future_date.strftime('%Y-%m-%d')
+future_date_str = future_date.strftime("%Y-%m-%d")
 
 bot = telegram.Bot(token=TOKEN)
 
@@ -28,11 +28,17 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 sg_timezone = timezone("Asia/Singapore")
 
-timestamp_3pm = int(time.mktime(future_date.replace(hour=15, minute=0, second=0).timetuple()))
-timestamp_4pm = int(time.mktime(future_date.replace(hour=16, minute=0, second=0).timetuple()))
+timestamp_3pm = int(
+    time.mktime(future_date.replace(hour=15, minute=0, second=0).timetuple())
+)
+timestamp_4pm = int(
+    time.mktime(future_date.replace(hour=16, minute=0, second=0).timetuple())
+)
+
 
 def unpad(s):
-    return s[:-ord(s[-1])]
+    return s[: -ord(s[-1])]
+
 
 def aes_decrypt(encrypted_text, key):
     key = hashlib.sha256(key.encode()).digest()
@@ -45,7 +51,11 @@ async def send_reminder():
     await bot.send_message(
         chat_id=CHAT_ID,
         text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
-        + future_date_str + "&timeslots="+timestamp_3pm+"&timeslots="+timestamp_4pm,
+        + future_date_str
+        + "&timeslots="
+        + str(timestamp_3pm)
+        + "&timeslots="
+        + str(timestamp_4pm),
         disable_notification=True,
     )
 
@@ -66,10 +76,12 @@ async def manual_trigger(request: Request):
     headers = dict(request.headers)
     print(headers)
     try:
-        if aes_decrypt(headers["auth_key"],AUTH_KEY) == KEY_WORD:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             await send_reminder()
         else:
+            print("FAILED")
             pass
     except:
+        print("FAILED EXCEPT")
         pass
     return {"message": "Reminder sent!"}
