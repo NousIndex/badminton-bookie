@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from Crypto.Cipher import AES
 import hashlib
 import base64
+import time
 
 app = FastAPI()
 
@@ -27,6 +28,8 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 sg_timezone = timezone("Asia/Singapore")
 
+timestamp_3pm = int(time.mktime(future_date.replace(hour=15, minute=0, second=0).timetuple()))
+timestamp_4pm = int(time.mktime(future_date.replace(hour=16, minute=0, second=0).timetuple()))
 
 def unpad(s):
     return s[:-ord(s[-1])]
@@ -42,7 +45,7 @@ async def send_reminder():
     await bot.send_message(
         chat_id=CHAT_ID,
         text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
-        + future_date_str,
+        + future_date_str + "&timeslots="+timestamp_3pm+"&timeslots="+timestamp_4pm,
         disable_notification=True,
     )
 
