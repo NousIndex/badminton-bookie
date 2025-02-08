@@ -28,12 +28,13 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 sg_timezone = timezone("Asia/Singapore")
 
-timestamp_3pm = int(
-    time.mktime(future_date.replace(hour=15, minute=0, second=0).timetuple())
-)
-timestamp_4pm = int(
-    time.mktime(future_date.replace(hour=16, minute=0, second=0).timetuple())
-)
+# Step 3: Set the correct time (3 PM and 4 PM SGT)
+future_date_3pm = sg_timezone.localize(future_date.replace(hour=15, minute=0, second=0))
+future_date_4pm = sg_timezone.localize(future_date.replace(hour=16, minute=0, second=0))
+
+# Step 4: Convert to Unix timestamps (seconds)
+timestamp_3pm = int(future_date_3pm.timestamp())*1000
+timestamp_4pm = int(future_date_4pm.timestamp())*1000
 
 
 def unpad(s):
