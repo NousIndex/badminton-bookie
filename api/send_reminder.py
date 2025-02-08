@@ -33,8 +33,8 @@ future_date_3pm = sg_timezone.localize(future_date.replace(hour=15, minute=0, se
 future_date_4pm = sg_timezone.localize(future_date.replace(hour=16, minute=0, second=0))
 
 # Step 4: Convert to Unix timestamps (seconds)
-timestamp_3pm = int(future_date_3pm.timestamp())*1000
-timestamp_4pm = int(future_date_4pm.timestamp())*1000
+timestamp_3pm = int(future_date_3pm.timestamp()) * 1000
+timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
 
 
 def unpad(s):
@@ -51,12 +51,17 @@ def aes_decrypt(encrypted_text, key):
 async def send_reminder():
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
-        + future_date_str
-        + "&timeslots="
+        text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
+        + "?timeslot="
         + str(timestamp_3pm)
-        + "&timeslots="
+        + "&timeslot="
         + str(timestamp_4pm),
+        # text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
+        # + future_date_str
+        # + "&timeslots="
+        # + str(timestamp_3pm)
+        # + "&timeslots="
+        # + str(timestamp_4pm),
         disable_notification=True,
     )
 
