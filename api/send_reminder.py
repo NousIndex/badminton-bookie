@@ -68,17 +68,12 @@ def home():
 @app.get("/send_reminder")
 async def manual_trigger(request: Request):
     headers = dict(request.headers)    
-    body: Dict = await request.json()  # Parse JSON body
-        
     print(headers)
-    # Process data
-    for date, details in body.items():
-        print(f"Date: {date}, Location: {details['location']}, Timeslot: {details['timeslot']}")
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-            if(headers["reminder_type"] == "ballot"):
+            if headers["reminder_type"] == "ballot":
                 await send_reminder()
-            elif(headers["reminder_type"] == "court_remind"):
+            elif headers["reminder_type"] == "court_remind":
                 pass
             else:
                 print("NO TYPE")
