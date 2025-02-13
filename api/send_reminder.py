@@ -1,14 +1,12 @@
 import os
-import asyncio
 import telegram
 from fastapi import FastAPI, Request
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
 from pytz import timezone
 from datetime import datetime, timedelta
 from Crypto.Cipher import AES
 import hashlib
 import base64
+from typing import Dict
 import time
 
 app = FastAPI()
@@ -19,22 +17,9 @@ AUTH_KEY = os.getenv("AUTH_KEY_DECODER")
 KEY_WORD = os.getenv("KEY_WORD")
 
 today_date = datetime.today()
-future_date = today_date + timedelta(days=14)
-future_date_str = future_date.strftime("%Y-%m-%d")
-
 bot = telegram.Bot(token=TOKEN)
 
-scheduler = BackgroundScheduler()
-scheduler.start()
 sg_timezone = timezone("Asia/Singapore")
-
-# Step 3: Set the correct time (3 PM and 4 PM SGT)
-future_date_3pm = sg_timezone.localize(future_date.replace(hour=15, minute=0, second=0))
-future_date_4pm = sg_timezone.localize(future_date.replace(hour=16, minute=0, second=0))
-
-# Step 4: Convert to Unix timestamps (seconds)
-timestamp_3pm = int(future_date_3pm.timestamp()) * 1000
-timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
 
 
 def unpad(s):
@@ -49,6 +34,16 @@ def aes_decrypt(encrypted_text, key):
 
 
 async def send_reminder():
+    future_date = today_date + timedelta(days=14)
+    
+    # Step 3: Set the correct time (3 PM and 4 PM SGT)
+    future_date_3pm = sg_timezone.localize(future_date.replace(hour=15, minute=0, second=0))
+    future_date_4pm = sg_timezone.localize(future_date.replace(hour=16, minute=0, second=0))
+    
+    # Step 4: Convert to Unix timestamps (seconds)
+    timestamp_3pm = int(future_date_3pm.timestamp()) * 1000
+    timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
+    
     await bot.send_message(
         chat_id=CHAT_ID,
         text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
@@ -65,13 +60,6 @@ async def send_reminder():
         disable_notification=True,
     )
 
-
-scheduler.add_job(
-    lambda: asyncio.run(send_reminder()),
-    CronTrigger(day_of_week="mon,sat,sun", hour=20, minute=0, timezone=sg_timezone),
-)
-
-
 @app.get("/")
 def home():
     return {"status": "Bot is running!"}
@@ -79,11 +67,21 @@ def home():
 
 @app.get("/send_reminder")
 async def manual_trigger(request: Request):
-    headers = dict(request.headers)
+    headers = dict(request.headers)    
+    body: Dict = await request.json()  # Parse JSON body
+        
     print(headers)
+    # Process data
+    for date, details in body.items():
+        print(f"Date: {date}, Location: {details['location']}, Timeslot: {details['timeslot']}")
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-            await send_reminder()
+            if(headers["reminder_type"] == "ballot"):
+                await send_reminder()
+            elif(headers["reminder_type"] == "court_remind"):
+                pass
+            else:
+                print("NO TYPE")
         else:
             print("FAILED")
             pass
