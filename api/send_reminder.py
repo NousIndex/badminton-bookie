@@ -109,7 +109,7 @@ async def manual_trigger2(request: Request):
             body: Dict = await request.json()  # Parse JSON body
 
             future_date = today_date + timedelta(days=1)
-            future_date_str = future_date.strftime("%d/%m")
+            future_date_str = future_date.strftime("%d-%m")
             future_date_str2 = future_date.strftime("%d-%m-%Y")
             print(future_date_str)
             # Process data
@@ -123,6 +123,6 @@ async def manual_trigger2(request: Request):
                     )
         else:
             print("FAILED")
-    except Exception as e: 
-        print("FAILED EXCEPT:\n" + e)
+    except:
+        print("FAILED EXCEPT")
     return {"message": "Reminder sent!"}
