@@ -35,15 +35,19 @@ def aes_decrypt(encrypted_text, key):
 
 async def send_reminder():
     future_date = today_date + timedelta(days=14)
-    
+
     # Step 3: Set the correct time (3 PM and 4 PM SGT)
-    future_date_3pm = sg_timezone.localize(future_date.replace(hour=15, minute=0, second=0))
-    future_date_4pm = sg_timezone.localize(future_date.replace(hour=16, minute=0, second=0))
-    
+    future_date_3pm = sg_timezone.localize(
+        future_date.replace(hour=15, minute=0, second=0)
+    )
+    future_date_4pm = sg_timezone.localize(
+        future_date.replace(hour=16, minute=0, second=0)
+    )
+
     # Step 4: Convert to Unix timestamps (seconds)
     timestamp_3pm = int(future_date_3pm.timestamp()) * 1000
     timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
-    
+
     await bot.send_message(
         chat_id=CHAT_ID,
         text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/WYfbYK8b8mvlTx7iiCIJp/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
@@ -60,6 +64,22 @@ async def send_reminder():
         disable_notification=True,
     )
 
+
+async def court_place(courtdate, location, timeslot, court):
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text="Court Reminder For Tomorrow:\n📍:"
+        + location
+        + "\n📅:"
+        + courtdate
+        + "\n⏰:"
+        + timeslot
+        + "\n🏸: Court "
+        + court,
+        disable_notification=True,
+    )
+
+
 @app.get("/")
 def home():
     return {"status": "Bot is running!"}
@@ -67,38 +87,41 @@ def home():
 
 @app.get("/send_reminder")
 async def manual_trigger(request: Request):
-    headers = dict(request.headers)    
+    headers = dict(request.headers)
     print(headers)
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             await send_reminder()
         else:
             print("FAILED")
-            pass
     except:
         print("FAILED EXCEPT")
-        pass
     return {"message": "Reminder sent!"}
+
 
 @app.post("/send_reminder_court")
 async def manual_trigger2(request: Request):
-    headers = dict(request.headers)    
+    headers = dict(request.headers)
     print(headers)
-    print("OK IT WORKS")
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             # await send_reminder()
             body: Dict = await request.json()  # Parse JSON body
 
+            future_date = today_date + timedelta(days=1)
+            future_date_str = future_date.strftime("%-d/%-m")
+            future_date_str2 = future_date.strftime("%d-%m-%Y")
             # Process data
             for date, details in body.items():
-                print(f"Date: {date}, Location: {details['location']}, Timeslot: {details['timeslot']}")
-
-            pass
+                if date == future_date_str:
+                    await court_place(
+                        future_date_str2,
+                        details["location"],
+                        details["timeslot"],
+                        details["court"],
+                    )
         else:
             print("FAILED")
-            pass
     except:
         print("FAILED EXCEPT")
-        pass
     return {"message": "Reminder sent!"}
