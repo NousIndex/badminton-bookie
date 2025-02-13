@@ -80,7 +80,7 @@ async def manual_trigger(request: Request):
         pass
     return {"message": "Reminder sent!"}
 
-@app.get("/send_reminder_court")
+@app.post("/send_reminder_court")
 async def manual_trigger2(request: Request):
     headers = dict(request.headers)    
     print(headers)
@@ -88,6 +88,12 @@ async def manual_trigger2(request: Request):
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             # await send_reminder()
+            body: Dict = await request.json()  # Parse JSON body
+
+            # Process data
+            for date, details in body.items():
+                print(f"Date: {date}, Location: {details['location']}, Timeslot: {details['timeslot']}")
+
             pass
         else:
             print("FAILED")
