@@ -123,6 +123,6 @@ async def manual_trigger2(request: Request):
                     )
         else:
             print("FAILED")
-    except:
-        print("FAILED EXCEPT")
+    except Exception as e: 
+        print("FAILED EXCEPT:\n" + e)
     return {"message": "Reminder sent!"}
