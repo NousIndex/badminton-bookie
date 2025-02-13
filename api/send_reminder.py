@@ -71,12 +71,24 @@ async def manual_trigger(request: Request):
     print(headers)
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-            if headers["reminder_type"] == "ballot":
-                await send_reminder()
-            elif headers["reminder_type"] == "court_remind":
-                pass
-            else:
-                print("NO TYPE")
+            await send_reminder()
+        else:
+            print("FAILED")
+            pass
+    except:
+        print("FAILED EXCEPT")
+        pass
+    return {"message": "Reminder sent!"}
+
+@app.get("/send_reminder_court")
+async def manual_trigger2(request: Request):
+    headers = dict(request.headers)    
+    print(headers)
+    print("OK IT WORKS")
+    try:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+            # await send_reminder()
+            pass
         else:
             print("FAILED")
             pass
