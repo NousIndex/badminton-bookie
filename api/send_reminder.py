@@ -68,11 +68,11 @@ async def send_reminder():
 async def court_place(courtdate, location, timeslot, court):
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="Court Reminder For Tomorrow:\n📍:"
+        text="Court Reminder For Tomorrow:\n📍: "
         + location
-        + "\n📅:"
+        + "\n📅: "
         + courtdate
-        + "\n⏰:"
+        + "\n⏰: "
         + timeslot
         + "\n🏸: Court "
         + court,
