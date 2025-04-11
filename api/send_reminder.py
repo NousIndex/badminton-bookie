@@ -13,6 +13,7 @@ app = FastAPI()
 
 TOKEN = os.getenv("TELE_TOKEN")
 CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
+CHAT_ID2 = os.getenv("TELE_GROUP_CHAT_ID2")
 AUTH_KEY = os.getenv("AUTH_KEY_DECODER")
 KEY_WORD = os.getenv("KEY_WORD")
 
@@ -64,6 +65,36 @@ async def send_reminder():
         disable_notification=True,
     )
 
+async def send_reminder2():
+    future_date = today_date + timedelta(days=14)
+
+    # Step 3: Set the correct time (3 PM and 4 PM SGT)
+    future_date_8pm = sg_timezone.localize(
+        future_date.replace(hour=20, minute=0, second=0)
+    )
+    future_date_9pm = sg_timezone.localize(
+        future_date.replace(hour=21, minute=0, second=0)
+    )
+
+    # Step 4: Convert to Unix timestamps (seconds)
+    timestamp_8pm = int(future_date_8pm.timestamp()) * 1000
+    timestamp_9pm = int(future_date_9pm.timestamp()) * 1000
+
+    await bot.send_message(
+        chat_id=CHAT_ID2,
+        text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/a3jznoZlsfyJrl43Tbnog/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
+        + "?timeslot="
+        + str(timestamp_8pm)
+        + "&timeslot="
+        + str(timestamp_9pm),
+        # text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/a3jznoZlsfyJrl43Tbnog/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
+        # + future_date_str
+        # + "&timeslots="
+        # + str(timestamp_3pm)
+        # + "&timeslots="
+        # + str(timestamp_4pm),
+        disable_notification=True,
+    )
 
 async def court_place(courtdate, location, timeslot, court):
     await bot.send_message(
@@ -92,6 +123,19 @@ async def manual_trigger(request: Request):
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             await send_reminder()
+        else:
+            print("FAILED")
+    except:
+        print("FAILED EXCEPT")
+    return {"message": "Reminder sent!"}
+
+@app.get("/send_reminder_work")
+async def manual_trigger(request: Request):
+    headers = dict(request.headers)
+    print(headers)
+    try:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+            await send_reminder2()
         else:
             print("FAILED")
     except:
