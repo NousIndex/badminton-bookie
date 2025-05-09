@@ -295,7 +295,7 @@ async def manual_trigger2(request: Request):
     return {"message": "Reminder sent!"}
 
 
-@app.post("/send_reminder_court_work")
+@app.get("/send_reminder_court_work")
 async def manual_trigger2(request: Request):
     headers = dict(request.headers)
     try:
