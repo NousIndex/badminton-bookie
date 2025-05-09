@@ -12,9 +12,7 @@ import time
 from pymongo import MongoClient
 from fastapi.middleware.cors import CORSMiddleware
 
-origins = [
-    "https://badminton-calendar.vercel.app"  # Your frontend domain
-]
+origins = ["https://badminton-calendar.vercel.app"]  # Your frontend domain
 app = FastAPI()
 
 app.add_middleware(
@@ -203,7 +201,7 @@ async def court_place_poll_work(courtdate, location, timeslot):
         + location
         + "("
         + getMRTByTitle(location)
-        + ")\n📅: "
+        + ")\n🗓️: "
         + courtdate
         + " ("
         + timeslot
@@ -221,7 +219,7 @@ async def court_place(courtdate, location, timeslot, court):
         chat_id=CHAT_ID,
         text="Court Reminder For Tomorrow:\n📍: "
         + location
-        + "\n📅: "
+        + "\n🗓️: "
         + courtdate
         + "\n⏰: "
         + timeslot
