@@ -10,8 +10,20 @@ import base64
 from typing import Dict
 import time
 from pymongo import MongoClient
+from fastapi.middleware.cors import CORSMiddleware
 
+origins = [
+    "https://badminton-calendar.vercel.app"  # Your frontend domain
+]
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or ["*"] for all, not recommended for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 TOKEN = os.getenv("TELE_TOKEN")
 CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
