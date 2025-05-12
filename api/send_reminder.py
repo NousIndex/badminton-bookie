@@ -52,8 +52,8 @@ def unpad(s):
     return s[: -ord(s[-1])]
 
 
-def save_message(chat_id: str, message_id: str, message_source: str, date: str):
-    collection.insert_one(
+async def save_message(chat_id: str, message_id: str, message_source: str, date: str):
+    await collection.insert_one(
         {
             "Date": date,
             "ChatId": str(chat_id),
@@ -64,11 +64,12 @@ def save_message(chat_id: str, message_id: str, message_source: str, date: str):
 
 
 async def delete_message_today():
-    result = collection.find({"Date": current_date_str})
+    result = await collection.find({"Date": current_date_str})
     for doc in result:
-        print(doc)
+        # print(doc)
         try:
-            await bot.delete_message(chat_id=doc["ChatId"], message_id=doc["MessageId"])
+            bot.delete_message(chat_id=doc["ChatId"], message_id=doc["MessageId"])
+
             collection.delete_one(
                 {"ChatId": doc["ChatId"], "MessageId": doc["MessageId"]}
             )
