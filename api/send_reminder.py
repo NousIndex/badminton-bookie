@@ -44,18 +44,21 @@ now_sgt = datetime.now(sg_timezone)
 future_date_plus1 = now_sgt + timedelta(days=1)
 current_date_str = now_sgt.strftime("%Y-%m-%d")
 future_date_plus1_str = future_date_plus1.strftime("%Y-%m-%d")
+future_date_plus2 = now_sgt + timedelta(days=2)
+future_date_plus2_str = future_date_plus2.strftime("%Y-%m-%d")
 
 
 def unpad(s):
     return s[: -ord(s[-1])]
 
 
-def save_message(chat_id: str, message_id: str):
+def save_message(chat_id: str, message_id: str, message_source: str, date: str):
     collection.insert_one(
         {
-            "Date": future_date_plus1_str,
+            "Date": date,
             "ChatId": str(chat_id),
             "MessageId": str(message_id),
+            "MessageSource": message_source,
         }
     )
 
@@ -110,7 +113,7 @@ async def send_reminder():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id)
+    save_message(msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str)
 
 
 async def send_reminder2():
@@ -143,7 +146,7 @@ async def send_reminder2():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id)
+    save_message(msg.chat.id, msg.message_id, "send_reminder2", future_date_plus1_str)
 
 
 def getLocationByTitle(title):
@@ -177,7 +180,7 @@ def getMRTByTitle(title):
 
 
 async def court_reminder_work(courtdate, location, timeslot, court):
-    await bot.send_message(
+    msg = await bot.send_message(
         chat_id=CHAT_ID2,
         text="<b>Court Reminder For Tomorrow:</b> \n📍: "
         + location
@@ -190,6 +193,10 @@ async def court_reminder_work(courtdate, location, timeslot, court):
         + "\n\n🗺️ : "
         + getLocationByTitle(location),
         parse_mode="HTML",
+    )
+
+    save_message(
+        msg.chat.id, msg.message_id, "court_reminder_work", future_date_plus2_str
     )
 
 
@@ -227,7 +234,7 @@ async def court_place(courtdate, location, timeslot, court):
         + court,
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id)
+    save_message(msg.chat.id, msg.message_id, "court_place", future_date_plus2_str)
 
 
 @app.get("/")
