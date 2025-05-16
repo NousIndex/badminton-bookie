@@ -34,6 +34,7 @@ client = MongoClient(MONGODB_URI)
 db = client["BadmintonBookie"]
 collection = db["DeleteMessages"]
 collection2 = db["BookedCourts"]
+collection3 = db["PollMessages"]
 
 sg_timezone = timezone("Asia/Singapore")
 
@@ -59,6 +60,26 @@ async def save_message(chat_id: str, message_id: str, message_source: str, date:
             "ChatId": str(chat_id),
             "MessageId": str(message_id),
             "MessageSource": message_source,
+        }
+    )
+
+
+async def save_message_poll(
+    chat_id: str,
+    message_id: str,
+    message_source: str,
+    date: str,
+    uuid_court: str,
+):
+    collection.insert_one(
+        {
+            "Date": date,
+            "ChatId": str(chat_id),
+            "MessageId": str(message_id),
+            "MessageSource": message_source,
+            "uuid_court": uuid_court,
+            "voters1": "[]",
+            "voters2": "[]",
         }
     )
 
@@ -114,7 +135,9 @@ async def send_reminder():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    await save_message(msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str)
+    await save_message(
+        msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str
+    )
 
 
 async def send_reminder2():
@@ -147,7 +170,9 @@ async def send_reminder2():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    await save_message(msg.chat.id, msg.message_id, "send_reminder2", future_date_plus1_str)
+    await save_message(
+        msg.chat.id, msg.message_id, "send_reminder2", future_date_plus1_str
+    )
 
 
 def getLocationByTitle(title):
@@ -201,7 +226,7 @@ async def court_reminder_work(courtdate, location, timeslot, court):
     )
 
 
-async def court_place_poll_work(courtdate, location, timeslot):
+async def court_place_poll_work(courtdate, location, timeslot, uuid):
     poll_message = await bot.send_poll(
         chat_id=CHAT_ID2,
         question="Badminton Session (Preferably 6-8 Pax)"
@@ -220,6 +245,13 @@ async def court_place_poll_work(courtdate, location, timeslot):
     )
 
     await bot.pin_chat_message(chat_id=CHAT_ID2, message_id=poll_message.message_id)
+    await save_message_poll(
+        poll_message.chat.id,
+        poll_message.message_id,
+        "court_place_poll_work",
+        courtdate,
+        uuid,
+    )
 
 
 async def court_place(courtdate, location, timeslot, court):
@@ -235,7 +267,9 @@ async def court_place(courtdate, location, timeslot, court):
         + court,
         disable_notification=True,
     )
-    await save_message(msg.chat.id, msg.message_id, "court_place", future_date_plus2_str)
+    await save_message(
+        msg.chat.id, msg.message_id, "court_place", future_date_plus2_str
+    )
 
 
 @app.get("/")
@@ -359,6 +393,7 @@ async def manual_trigger2(request: Request):
             # Process data
             start_str = body["start"]
             end_str = body["end"]
+            uuid_str = body["uuid"]
 
             start_time = datetime.fromisoformat(start_str)
             end_time = datetime.fromisoformat(end_str)
@@ -371,9 +406,7 @@ async def manual_trigger2(request: Request):
             # Combine into string
             time_range = f"{start_hour}-{end_hour}{meridiem}"
             await court_place_poll_work(
-                date_str,
-                body["location"],
-                time_range,
+                date_str, body["location"], time_range, uuid_str
             )
         else:
             print("FAILED")
