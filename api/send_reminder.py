@@ -53,7 +53,7 @@ def unpad(s):
 
 
 async def save_message(chat_id: str, message_id: str, message_source: str, date: str):
-    await collection.insert_one(
+    collection.insert_one(
         {
             "Date": date,
             "ChatId": str(chat_id),
@@ -114,7 +114,7 @@ async def send_reminder():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str)
+    await save_message(msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str)
 
 
 async def send_reminder2():
@@ -147,7 +147,7 @@ async def send_reminder2():
         # + str(timestamp_4pm),
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id, "send_reminder2", future_date_plus1_str)
+    await save_message(msg.chat.id, msg.message_id, "send_reminder2", future_date_plus1_str)
 
 
 def getLocationByTitle(title):
@@ -196,7 +196,7 @@ async def court_reminder_work(courtdate, location, timeslot, court):
         parse_mode="HTML",
     )
 
-    save_message(
+    await save_message(
         msg.chat.id, msg.message_id, "court_reminder_work", future_date_plus2_str
     )
 
@@ -235,7 +235,7 @@ async def court_place(courtdate, location, timeslot, court):
         + court,
         disable_notification=True,
     )
-    save_message(msg.chat.id, msg.message_id, "court_place", future_date_plus2_str)
+    await save_message(msg.chat.id, msg.message_id, "court_place", future_date_plus2_str)
 
 
 @app.get("/")
