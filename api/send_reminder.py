@@ -85,6 +85,7 @@ async def save_message_poll(
 
 
 async def delete_message_today():
+    print(current_date_str)
     result = await collection.find({"Date": current_date_str})
     print("Deleting messages...")
     for doc in result:
