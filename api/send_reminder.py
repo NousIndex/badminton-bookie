@@ -309,14 +309,11 @@ async def manual_trigger(request: Request):
 async def manual_trigger3(request: Request):
     headers = dict(request.headers)
     # print(headers)
-    try:
-        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-            print("SUCCESS")
-            await delete_message_today()
-        else:
-            print("FAILED")
-    except:
-        print("FAILED EXCEPT")
+    if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+        print("SUCCESS")
+        await delete_message_today()
+    else:
+        print("FAILED")
     return {"message": "Reminder sent!"}
 
 
