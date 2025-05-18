@@ -89,7 +89,7 @@ async def delete_message_today():
     for doc in result:
         # print(doc)
         try:
-            bot.delete_message(chat_id=doc["ChatId"], message_id=doc["MessageId"])
+            await bot.delete_message(chat_id=doc["ChatId"], message_id=doc["MessageId"])
 
             collection.delete_one(
                 {"ChatId": doc["ChatId"], "MessageId": doc["MessageId"]}
