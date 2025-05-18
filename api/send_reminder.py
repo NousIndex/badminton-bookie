@@ -85,11 +85,8 @@ async def save_message_poll(
 
 
 async def delete_message_today():
-    print(current_date_str)
-    result = await collection.find({"Date": current_date_str})
-    print("Deleting messages...")
+    result = collection.find({"Date": current_date_str})
     for doc in result:
-        print(doc)
         try:
             await bot.delete_message(chat_id=doc["ChatId"], message_id=doc["MessageId"])
 
@@ -313,7 +310,6 @@ async def manual_trigger3(request: Request):
     # print(headers)
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-            print("SUCCESS")
             await delete_message_today()
         else:
             print("FAILED")
