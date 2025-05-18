@@ -86,6 +86,7 @@ async def save_message_poll(
 
 async def delete_message_today():
     result = await collection.find({"Date": current_date_str})
+    print("Deleting messages...")
     for doc in result:
         print(doc)
         try:
@@ -309,11 +310,14 @@ async def manual_trigger(request: Request):
 async def manual_trigger3(request: Request):
     headers = dict(request.headers)
     # print(headers)
-    if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
-        print("SUCCESS")
-        await delete_message_today()
-    else:
-        print("FAILED")
+    try:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+            print("SUCCESS")
+            await delete_message_today()
+        else:
+            print("FAILED")
+    except:
+        print("FAILED EXCEPT")
     return {"message": "Reminder sent!"}
 
 
