@@ -26,6 +26,7 @@ app.add_middleware(
 TOKEN = os.getenv("TELE_TOKEN")
 CHAT_ID = os.getenv("TELE_GROUP_CHAT_ID")
 CHAT_ID2 = os.getenv("TELE_GROUP_CHAT_ID2")
+CHAT_ID3 = os.getenv("TELE_GROUP_CHAT_ID3")
 AUTH_KEY = os.getenv("AUTH_KEY_DECODER")
 KEY_WORD = os.getenv("KEY_WORD")
 MONGODB_URI = os.getenv("MONGODB")
@@ -36,14 +37,13 @@ collection = db["DeleteMessages"]
 collection2 = db["BookedCourts"]
 collection3 = db["PollMessages"]
 
-sg_timezone = timezone("Asia/Singapore")
-
 today_date = datetime.today()
 bot = telegram.Bot(token=TOKEN)
 
+sg_timezone = timezone("Asia/Singapore")
 now_sgt = datetime.now(sg_timezone)
-future_date_plus1 = now_sgt + timedelta(days=1)
 current_date_str = now_sgt.strftime("%Y-%m-%d")
+future_date_plus1 = now_sgt + timedelta(days=1)
 future_date_plus1_str = future_date_plus1.strftime("%Y-%m-%d")
 future_date_plus2 = now_sgt + timedelta(days=2)
 future_date_plus2_str = future_date_plus2.strftime("%Y-%m-%d")
@@ -139,6 +139,35 @@ async def send_reminder():
     )
 
 
+async def send_reminder3():
+    future_date = today_date + timedelta(days=14)
+
+    # Step 3: Set the correct time (3 PM and 4 PM SGT)
+    future_date_3pm = sg_timezone.localize(
+        future_date.replace(hour=18, minute=0, second=0)
+    )
+    future_date_4pm = sg_timezone.localize(
+        future_date.replace(hour=19, minute=0, second=0)
+    )
+
+    # Step 4: Convert to Unix timestamps (seconds)
+    timestamp_3pm = int(future_date_3pm.timestamp()) * 1000
+    timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
+
+    msg = await bot.send_message(
+        chat_id=CHAT_ID,
+        text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/iQYIzofibpiGOEHMDZTXr/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
+        + "?timeslot="
+        + str(timestamp_3pm)
+        + "&timeslot="
+        + str(timestamp_4pm),
+        disable_notification=True,
+    )
+    await save_message(
+        msg.chat.id, msg.message_id, "send_reminder", future_date_plus1_str
+    )
+
+
 async def send_reminder2():
     future_date = today_date + timedelta(days=14)
 
@@ -161,12 +190,6 @@ async def send_reminder2():
         + str(timestamp_8pm)
         + "&timeslot="
         + str(timestamp_9pm),
-        # text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/a3jznoZlsfyJrl43Tbnog/activities/YLONatwvqJfikKOmB5N9U/timeslots?date="
-        # + future_date_str
-        # + "&timeslots="
-        # + str(timestamp_3pm)
-        # + "&timeslots="
-        # + str(timestamp_4pm),
         disable_notification=True,
     )
     await save_message(
@@ -271,6 +294,24 @@ async def court_place(courtdate, location, timeslot, court):
     )
 
 
+async def court_place_2(courtdate, location, timeslot, court):
+    msg = await bot.send_message(
+        chat_id=CHAT_ID3,
+        text="Court Reminder For Tomorrow:\n📍: "
+        + location
+        + "\n🗓️: "
+        + courtdate
+        + "\n⏰: "
+        + timeslot
+        + "\n🏸: Court "
+        + court,
+        disable_notification=True,
+    )
+    await save_message(
+        msg.chat.id, msg.message_id, "court_place", future_date_plus2_str
+    )
+
+
 @app.get("/")
 def home():
     return {"status": "Bot is running!"}
@@ -283,6 +324,20 @@ async def manual_trigger(request: Request):
     try:
         if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
             await send_reminder()
+        else:
+            print("FAILED")
+    except:
+        print("FAILED EXCEPT")
+    return {"message": "Reminder sent!"}
+
+
+@app.get("/send_reminder_sec")
+async def manual_trigger(request: Request):
+    headers = dict(request.headers)
+    # print(headers)
+    try:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+            await send_reminder3()
         else:
             print("FAILED")
     except:
@@ -334,6 +389,33 @@ async def manual_trigger2(request: Request):
             for date, details in body.items():
                 if date == future_date_str:
                     await court_place(
+                        future_date_str2,
+                        details["location"],
+                        details["timeslot"],
+                        details["court"],
+                    )
+        else:
+            print("FAILED")
+    except:
+        print("FAILED EXCEPT")
+    return {"message": "Reminder sent!"}
+
+
+@app.post("/send_reminder_court_sec")
+async def manual_trigger2(request: Request):
+    headers = dict(request.headers)
+    try:
+        if aes_decrypt(headers["auth_key"], AUTH_KEY) == KEY_WORD:
+            # await send_reminder()
+            body: Dict = await request.json()  # Parse JSON body
+
+            future_date = today_date + timedelta(days=1)
+            future_date_str = future_date.strftime("%-d/%-m")
+            future_date_str2 = future_date.strftime("%d-%m-%Y")
+            # Process data
+            for date, details in body.items():
+                if date == future_date_str:
+                    await court_place_2(
                         future_date_str2,
                         details["location"],
                         details["timeslot"],
