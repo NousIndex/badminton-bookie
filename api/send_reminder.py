@@ -155,7 +155,7 @@ async def send_reminder3():
     timestamp_4pm = int(future_date_4pm.timestamp()) * 1000
 
     msg = await bot.send_message(
-        chat_id=CHAT_ID,
+        chat_id=CHAT_ID3,
         text="Ballot Reminder:\nhttps://activesg.gov.sg/venues/iQYIzofibpiGOEHMDZTXr/activities/YLONatwvqJfikKOmB5N9U/review/ballot"
         + "?timeslot="
         + str(timestamp_3pm)
